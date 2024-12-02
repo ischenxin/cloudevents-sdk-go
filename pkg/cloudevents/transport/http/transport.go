@@ -215,12 +215,19 @@ func (t *Transport) obsSend(ctx context.Context, event cloudevents.Event) (conte
 		}
 		return httpDo(ctx, client, &req, func(resp *http.Response, err error) (context.Context, *cloudevents.Event, error) {
 			headers := make(map[string]string, 0)
-			for k, v := range resp.Header {
-				headers[k] = strings.Join(v, ",")
+			if resp == nil {
+				fmt.Println("response is nil")
+			}
+			if resp.Header == nil {
+				fmt.Println("response header is nil")
+			}
+			if resp != nil && resp.Header != nil {
+				for k, v := range resp.Header {
+					headers[k] = strings.Join(v, ",")
+				}
 			}
 			b, _ := json.Marshal(headers)
 			fmt.Printf("obsSend headers: %v,err: %s\n", string(b), err.Error())
-
 			rctx := WithTransportContext(ctx, NewTransportContextFromResponse(resp))
 			if err != nil {
 				return rctx, nil, err
